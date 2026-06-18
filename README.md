@@ -1,5 +1,7 @@
 # skill-search
 
+[![tests](https://github.com/sowhan/skill-search/actions/workflows/test.yml/badge.svg)](https://github.com/sowhan/skill-search/actions/workflows/test.yml)
+
 **Semantic, on-demand skill retrieval for Claude Code.** Claude Code injects a
 short blurb for every installed skill into context on *every* turn so it can
 decide which to use. As your skill count grows, that listing becomes a large
@@ -27,18 +29,21 @@ All numbers below are **measured**, not estimated by vibes — on a real setup o
 
 The native skill listing injects name + description for all skills, every turn.
 At `name-only`, only the names remain and the retriever supplies descriptions
-on demand.
+on demand. Counted with a real BPE tokenizer (`tiktoken` cl100k_base), modeling
+each skill as it appears in the listing (`- name: description`):
 
 | | Tokens injected per turn | % of a 200K window |
 |---|---:|---:|
-| Native full listing (name + description) | ~7,487 | 3.74% |
-| `name-only` + skill-search | ~617 | 0.31% |
-| **Saved, every turn** | **~6,870** | **~3.4%** |
+| Native full listing (name + description) | 7,267 | 3.63% |
+| `name-only` + skill-search | 887 | 0.44% |
+| **Saved, every turn** | **6,380** | **3.19%** |
 
-That's ~59 tokens/skill of description you stop paying for on turns that don't
+That's ~53 tokens/skill of description you stop paying for on turns that don't
 need them. The worst offenders are generic-named skills whose value lives
-entirely in the description (`context-mode:context-mode` alone is ~264 tokens) —
-exactly the skills `name-only` + retrieval handles best.
+entirely in the description (`context-mode:context-mode` alone is 235 tokens) —
+exactly the skills `name-only` + retrieval handles best. (cl100k_base
+approximates Claude's tokenizer; reproduce with
+[`scripts/measure_tokens.py`](scripts/measure_tokens.py).)
 
 ### 2. It fixes the name-bias miss (real, unedited output)
 
@@ -61,6 +66,21 @@ $ query: "set up a supabase database with auth"
    0.575  supabase:supabase-postgres-best-practices
    0.542  superpowers:executing-plans
 ```
+
+Beyond cherry-picked examples: on a 24-query labeled set
+([`eval/labeled_queries.jsonl`](eval/labeled_queries.jsonl)) the default
+service-free embedder (`bge-small`, 384-dim) scores:
+
+| | recall@1 | recall@3 | recall@6 |
+|---|---:|---:|---:|
+| bge-small (default) | 0.67 | 0.79 | 0.79 |
+
+That's a conservative floor — a few counted "misses" are arguably valid
+alternatives the strict labels don't list (e.g. `gsd-verify-work` for "confirm
+my change works"). The genuine misses are short, generic-named skills
+(`keybindings-help`, `loop`) where a small embedder struggles; the opt-in Ollama
+tier (768-dim) typically lifts recall further. Reproduce — and the misses —
+with `python eval/run_eval.py`.
 
 ### 3. It stays fast as the index grows
 
