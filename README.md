@@ -1,6 +1,8 @@
 # skill-search
 
+[![PyPI](https://img.shields.io/pypi/v/skill-search-mcp)](https://pypi.org/project/skill-search-mcp/)
 [![tests](https://github.com/sowhan/skill-search/actions/workflows/test.yml/badge.svg)](https://github.com/sowhan/skill-search/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Semantic, on-demand skill retrieval for Claude Code.** Claude Code injects a
 short blurb for every installed skill into context on *every* turn so it can
