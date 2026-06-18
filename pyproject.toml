@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "skill-search"
+name = "skill-search-mcp"
 version = "0.1.0"
 description = "Semantic, on-demand skill retrieval for Claude Code — replaces the native skill-listing token tax with a vector retriever over full skill descriptions."
 readme = "README.md"
@@ -29,17 +29,15 @@ dependencies = [
 dev = ["pytest>=8", "tiktoken>=0.7"]
 
 [project.scripts]
-skill-search = "server:main"
-skill-search-overrides = "generate_overrides:main"
+skill-search = "skill_search.server:main"
+skill-search-overrides = "skill_search.generate_overrides:main"
 
 [project.urls]
 Homepage = "https://github.com/sowhan/skill-search"
 Issues = "https://github.com/sowhan/skill-search/issues"
 
-# Flat layout: three top-level modules, no package dir. Install via `uvx`/`pipx`
-# (isolated env) so these generic module names can't collide with anything else.
 [tool.setuptools]
-py-modules = ["server", "skills_discovery", "generate_overrides"]
+packages = ["skill_search"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

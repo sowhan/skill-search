@@ -4,7 +4,7 @@ so this is the most important thing to pin."""
 
 from pathlib import Path
 
-import skills_discovery as sd
+from skill_search import skills_discovery as sd
 
 
 def make_skill(root: Path, name: str, desc="d", body="b", when=None, dirname=None) -> Path:

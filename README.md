@@ -118,9 +118,9 @@ Skip step 1 and you pay the native tax **and** the retriever. Do both.
 
 | File | Role |
 |---|---|
-| `server.py` | MCP server: `search_skills`, `get_skill`, `reindex`, `health` |
-| `skills_discovery.py` | Shared skill discovery — one source of truth for both halves |
-| `generate_overrides.py` | Frees the budget by setting skills to `name-only` |
+| `skill_search/server.py` | MCP server: `search_skills`, `get_skill`, `reindex`, `health` |
+| `skill_search/skills_discovery.py` | Shared skill discovery — one source of truth for both halves |
+| `skill_search/generate_overrides.py` | Frees the budget by setting skills to `name-only` |
 
 ---
 
@@ -131,8 +131,7 @@ embeddings ([fastembed](https://github.com/qdrant/fastembed)). No Docker, no
 Ollama, no manual model pull (the model downloads once, then runs offline).
 
 ```bash
-git clone https://github.com/sowhan/skill-search && cd skill-search
-pipx install .          # isolated install (or: pip install -e .)
+pipx install skill-search-mcp   # one command — installs the skill-search CLI
 
 # 1. build the index once (incremental afterwards; --force for a full rebuild)
 skill-search --reindex
@@ -141,7 +140,9 @@ skill-search --reindex
 claude mcp add --transport stdio skill-search -- skill-search
 
 # 3. install the router skill (the always-on trigger — see "The router skill")
-cp -r skills/skill-search ~/.claude/skills/
+mkdir -p ~/.claude/skills/skill-search
+curl -sL https://raw.githubusercontent.com/sowhan/skill-search/main/skills/skill-search/SKILL.md \
+  -o ~/.claude/skills/skill-search/SKILL.md
 
 # 4. free the budget: set all OTHER skills to name-only
 skill-search-overrides  # project scope; --global targets ~/.claude
@@ -160,6 +161,8 @@ export SKILL_EMBED_BACKEND=ollama                      # Ollama embeddings
 ```
 
 Pin these as `--env` flags on `claude mcp add` to keep them for the registered server.
+
+**From source** (dev / contributing): `git clone https://github.com/sowhan/skill-search && cd skill-search && pipx install .` — then `cp -r skills/skill-search ~/.claude/skills/` for the router skill.
 
 ---
 

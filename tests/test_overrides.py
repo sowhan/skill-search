@@ -3,7 +3,7 @@ the override mapping is what actually frees the 1% budget, so it's worth pinning
 
 import json
 
-import generate_overrides as go
+from skill_search import generate_overrides as go
 
 
 def test_compute_overrides_keeps_allowlist_on_rest_name_only():

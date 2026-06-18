@@ -23,7 +23,7 @@ from pathlib import Path
 # Shared with server.py: the set of skills the retriever indexes is exactly the
 # set we free from the budget here. Uses the same parsed `name` (frontmatter,
 # falling back to directory) so override keys match what search_skills returns.
-from skills_discovery import discover_skills
+from skill_search.skills_discovery import discover_skills
 
 # Skills to leave fully "on" (name + description in context). Keep this tiny —
 # these are the entry points Claude relies on without a search round-trip.

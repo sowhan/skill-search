@@ -52,7 +52,7 @@ import requests
 
 # Skill discovery is shared with generate_overrides.py so both halves operate
 # on the exact same set of skills/names — see skills_discovery.py.
-from skills_discovery import discover_skills, discover_skill_paths
+from skill_search.skills_discovery import discover_skills, discover_skill_paths
 
 
 # ---------------------------------------------------------------------------

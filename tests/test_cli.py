@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-import server
+from skill_search import server
 
 
 def test_cli_reindex_prints_stats(monkeypatch, capsys):

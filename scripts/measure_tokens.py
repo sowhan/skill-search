@@ -9,7 +9,7 @@ compares it to what remains once descriptions are dropped ("- name").
 Run from the repo root:  python scripts/measure_tokens.py
 """
 
-from skills_discovery import discover_skills
+from skill_search.skills_discovery import discover_skills
 
 WINDOW = 200_000  # reference context window for the percentage columns
 

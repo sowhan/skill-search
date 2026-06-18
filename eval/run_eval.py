@@ -16,7 +16,7 @@ import json
 import sys
 from pathlib import Path
 
-import server
+from skill_search import server
 
 KS = (1, 3, 6)
 

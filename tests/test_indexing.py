@@ -7,8 +7,8 @@ import uuid
 
 import pytest
 
-import skills_discovery as sd
-import server   # conftest pins embedded/offline config before this import
+from skill_search import skills_discovery as sd
+from skill_search import server   # conftest pins embedded/offline config before this import
 
 
 # --- pure helpers (offline) ----------------------------------------------
