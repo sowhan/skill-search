@@ -30,29 +30,45 @@ from skills_discovery import discover_skills
 DEFAULT_KEEP_ON = {"skill-search", "skill-finder"}
 
 
+def keep_on_from_argv(argv: list[str]) -> set[str]:
+    """The keep-on allowlist: the defaults plus anything after `--keep`
+    (stopping at the next flag, so `--keep a b --global` doesn't swallow --global)."""
+    keep_on = set(DEFAULT_KEEP_ON)
+    if "--keep" in argv:
+        for a in argv[argv.index("--keep") + 1:]:
+            if a.startswith("-"):
+                break
+            keep_on.add(a)
+    return keep_on
+
+
+def compute_overrides(names, keep_on) -> dict:
+    """Map each skill name to 'on' (keep-on allowlist) or 'name-only' (everything
+    else). This is the whole budget-freeing decision, isolated for testing."""
+    return {n: ("on" if n in keep_on else "name-only") for n in sorted(names)}
+
+
+def write_overrides(settings_path: Path, overrides: dict) -> None:
+    """Merge skillOverrides into settings.local.json without clobbering other keys."""
+    settings = {}
+    if settings_path.exists():
+        settings = json.loads(settings_path.read_text())
+    settings["skillOverrides"] = overrides
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    settings_path.write_text(json.dumps(settings, indent=2))
+
+
 def main():
     is_global = "--global" in sys.argv
-    keep_on = set(DEFAULT_KEEP_ON)
-    if "--keep" in sys.argv:
-        idx = sys.argv.index("--keep")
-        keep_on |= set(sys.argv[idx + 1:])
+    keep_on = keep_on_from_argv(sys.argv)
 
     base = Path.home() / ".claude" if is_global else Path.cwd() / ".claude"
     settings_path = base / "settings.local.json"
 
     # Same discovery the retriever uses: personal + project + plugin skills.
     names = sorted({s["name"] for s in discover_skills()})
-
-    overrides = {n: ("on" if n in keep_on else "name-only") for n in names}
-
-    # Merge into existing settings rather than clobbering other keys.
-    settings = {}
-    if settings_path.exists():
-        settings = json.loads(settings_path.read_text())
-    settings["skillOverrides"] = overrides
-
-    base.mkdir(parents=True, exist_ok=True)
-    settings_path.write_text(json.dumps(settings, indent=2))
+    overrides = compute_overrides(names, keep_on)
+    write_overrides(settings_path, overrides)
 
     on = [n for n, v in overrides.items() if v == "on"]
     print(json.dumps({

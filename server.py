@@ -37,8 +37,13 @@ import sys
 import json
 import time
 import uuid
+import logging
 import hashlib
 from pathlib import Path
+
+# Library-style logger: no handler/basicConfig here (that's the host app's call).
+# Enable with logging.getLogger("skill_search").setLevel(logging.DEBUG).
+log = logging.getLogger("skill_search")
 
 from mcp.server.fastmcp import FastMCP
 from qdrant_client import QdrantClient, models
@@ -179,8 +184,10 @@ def _ollama_embed_batch(texts: list[str]) -> list[list[float]]:
         embs = resp.json().get("embeddings")
         if embs and len(embs) == len(texts):
             return embs
-    except Exception:
-        pass
+    except Exception as e:
+        # Not fatal — fall back to the legacy per-item endpoint. But log WHY, so a
+        # silent degradation to N sequential calls is visible when debugging.
+        log.debug("ollama batch embed failed, falling back to per-item: %s", e)
     return [_ollama_embed_one(t) for t in texts]
 
 
