@@ -108,6 +108,36 @@ would otherwise hide skills with no symptom. Guards:
 
 ---
 
+## "But isn't the skill listing prompt-cached?"
+
+Fair question, and worth being precise about. Claude Code keeps the skill listing
+in its cached prefix, so on a cache hit you're billed only ~10% for those tokens —
+the ~7,300-token listing costs closer to ~700 token-equivalents on a cached turn.
+That genuinely softens the **dollar** cost, and the savings table above is best
+read as the *uncached* (worst-case) figure.
+
+But caching is a **billing** optimization, not a **context-window** one. Cached or
+not, those tokens still occupy your 200K window on **every** turn — crowding out the
+codebase, the diff, the long conversation. The window-occupancy win above is
+**unaffected by caching**, and for long or context-heavy sessions that headroom is
+the whole point.
+
+Two details that keep skill-search itself cache-friendly:
+
+- **`name-only` is a one-time, stable change** to the prefix — cached exactly like the
+  full listing was. The MCP tool definitions are a small, stable addition to the
+  cached `tools` block. Nothing here forces repeated cache writes.
+- **The only dynamic piece is the `search_skills` result** — a few hundred tokens
+  appended like any tool result, which then caches into the prefix for later turns.
+  It doesn't invalidate the cache.
+
+Net: on cache-hit turns the **price** saving is ~10% of the token delta; on cache
+misses (first turn, after the ~5-min cache TTL lapses, or whenever the prefix
+changes) you save the full amount. Either way, the **context space** comes back
+every turn.
+
+---
+
 ## How it works (two pieces, useless apart)
 
 1. **`generate_overrides.py`** → sets ~all skills to `name-only` in
