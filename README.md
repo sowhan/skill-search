@@ -111,20 +111,22 @@ embeddings ([fastembed](https://github.com/qdrant/fastembed)). No Docker, no
 Ollama, no manual model pull (the model downloads once, then runs offline).
 
 ```bash
-pipx install .          # isolated install
-# or run without installing:
-uvx --from . skill-search --health
+git clone https://github.com/sowhan/skill-search && cd skill-search
+pipx install .          # isolated install (or: pip install -e .)
 
 # 1. build the index once (incremental afterwards; --force for a full rebuild)
 skill-search --reindex
 
-# 2. free the budget (project scope; --global targets ~/.claude)
-skill-search-overrides
-
-# 3. register the MCP with Claude Code (no-arg console script = stdio server)
+# 2. register the MCP with Claude Code (no-arg console script = stdio server)
 claude mcp add --transport stdio skill-search -- skill-search
 
-# 4. (optional) confirm inside a Claude Code session
+# 3. install the router skill (the always-on trigger — see "The router skill")
+cp -r skills/skill-search ~/.claude/skills/
+
+# 4. free the budget: set all OTHER skills to name-only
+skill-search-overrides  # project scope; --global targets ~/.claude
+
+# 5. (optional) confirm inside a Claude Code session
 #    /mcp     and     /doctor
 ```
 
@@ -143,27 +145,19 @@ Pin these as `--env` flags on `claude mcp add` to keep them for the registered s
 
 ## The router skill (keep this one `"on"`)
 
-Save to `~/.claude/skills/skill-search/SKILL.md`. It's the always-visible entry
-point that tells Claude to retrieve before guessing.
+The always-visible entry point that tells Claude to retrieve before guessing
+ships in this repo as an installable skill at [`skills/skill-search/`](skills/skill-search/SKILL.md).
+Install it (done automatically by step 4 of [Install](#install)):
 
-```markdown
----
-name: skill-search
-description: Find the right skills for a task before acting. Use at the start of any multi-step or unfamiliar request to retrieve relevant skills by meaning, not name. Triggers when the user asks to build, set up, design, deploy, fix, or automate something and the right skill isn't obvious.
----
-
-Before tackling this task, call the `search_skills` MCP tool with a short query
-describing the user's goal. It returns ranked skills by semantic relevance.
-
-Then:
-1. Read the returned names + descriptions.
-2. Invoke the genuinely relevant ones by name (e.g. /frontend-design).
-3. Ignore low-score results — do not load skills that aren't relevant.
-4. If a result looks promising but the description is thin, call `get_skill`
-   on it before deciding.
-
-Prefer 2-4 high-relevance skills over loading many. Precision keeps context lean.
+```bash
+cp -r skills/skill-search ~/.claude/skills/
 ```
+
+It's deliberately tiny — frontmatter plus a few lines of instruction — so it
+costs almost nothing to keep `"on"` while every other skill goes `name-only`.
+Its whole job: on a new task, call `search_skills`, then invoke the 2-4 genuinely
+relevant results by name. Keep this skill (and `skill-search` itself) in the
+`generate_overrides` keep-on allowlist.
 
 ---
 
