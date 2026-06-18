@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skill-search"
+version = "0.1.0"
+description = "Semantic, on-demand skill retrieval for Claude Code — replaces the native skill-listing token tax with a vector retriever over full skill descriptions."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Sowhan Mohammed", email = "sowhan.mohammed@gmail.com" }]
+keywords = ["claude", "claude-code", "mcp", "skills", "semantic-search", "rag", "qdrant"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+# Default install is SERVICE-FREE: embedded Qdrant + fastembed (no Docker, no Ollama).
+dependencies = [
+    "mcp[cli]>=1.2",
+    "qdrant-client>=1.12",
+    "fastembed>=0.3",
+    "requests>=2.28",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+skill-search = "server:main"
+skill-search-overrides = "generate_overrides:main"
+
+[project.urls]
+Homepage = "https://github.com/sowhan/skill-search"
+Issues = "https://github.com/sowhan/skill-search/issues"
+
+# Flat layout: three top-level modules, no package dir. Install via `uvx`/`pipx`
+# (isolated env) so these generic module names can't collide with anything else.
+[tool.setuptools]
+py-modules = ["server", "skills_discovery", "generate_overrides"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: end-to-end test that loads the embedder/vector store (deselect with -m 'not integration')",
+]

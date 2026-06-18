@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+
+# skill-search runtime state (embedded Qdrant + index manifest)
+.cache/
+*.index_meta.json
+
+# Claude Code: local machine config + internal dev guidance (not user-facing)
+.claude/
+CLAUDE.md
+
+# OS / editor
+.DS_Store
